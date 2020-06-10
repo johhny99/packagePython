@@ -1,5 +1,15 @@
 #pip install selenium
 #pip install chromedriver-binary
+#pip install flask
+#pip install -U flask-cors
+
+from flask import Flask, render_template, redirect, url_for,request
+from flask import make_response,jsonify
+from flask_cors import CORS, cross_origin
+app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -12,7 +22,7 @@ class TwitterBot:
     def __init__(self,username, password):
         self.username=username
         self.password=password
-        self.bot=webdriver.Chrome("chromedriver_win32/chromedriver.exe")
+        self.bot=webdriver.Chrome("../chromedriver_win32/chromedriver.exe")
 
     def login(self):
         bot=self.bot
@@ -26,5 +36,32 @@ class TwitterBot:
         password.send_keys(self.password)
         password.send_keys(Keys.RETURN)
 
-# ed=TwitterBot('storyofwho','12345')
-# ed.login()
+@app.route('/api/getsample', methods=['POST'])
+@cross_origin()
+def getsample():
+    data = {'name': 'nabin khadka'}
+    dataIn= request.json
+    
+    print((dataIn))
+    
+    # message = None
+    if request.method == 'POST':
+        ed=TwitterBot(dataIn['username'],dataIn['password'])
+        res=ed.login()
+    return dataIn['username']
+    # return jsonify(data)
+
+@app.route('/api/login', methods=['POST'])
+def testfunction():
+    
+    dataIn= request.get_json()
+    print(dataIn)
+    
+    message = None
+    if request.method == 'POST':
+        ed=TwitterBot(dataIn['username'],dataIn['password'])
+        res=ed.login()
+    return 'Ok'
+
+if __name__ == "__main__":
+    app.run(debug = True)
